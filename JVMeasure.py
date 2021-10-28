@@ -99,10 +99,10 @@ class JVMeasure(Measurement):
             np.savetxt(data_filename,np.vstack((self.vlist,np.array(self.data))).T)
 
         elif self.settings['Measurement'] == 'Current Tracking':
-            np.savetxt(data_filename,np.vstack((self.tlist,np.array(self.data))).T)
+            np.savetxt(data_filename,np.vstack((np.array(self.tlist),np.array(self.data))).T)
 
         else:
-            np.savetxt(data_filename,np.vstack((self.tlist,np.array(self.data))).T)
+            np.savetxt(data_filename,np.vstack((np.array(self.tlist),np.array(self.data))).T)
 
     def pre_run(self):
         self.lock_start_button()
@@ -157,6 +157,8 @@ class JVMeasure(Measurement):
                 self.data.append(temp_dat)
 
                 time.sleep(S['vtrack_delay'])
+
+        self.save_file()
 
 
     def setup_figure(self):
