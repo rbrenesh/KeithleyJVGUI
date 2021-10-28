@@ -27,9 +27,11 @@ class Keithley2450HW(HardwareComponent):
         self.settings.New('Output',dtype='str', choices = [('On','On'),('Off','Off')], initial = 'Off')
         self.settings.New('Terminals', dtype =str, choices=[('Front','Front'),('Rear','Rear')], initial='Rear')
         self.settings.New('Sense', dtype =str, choices=[('2Wire','2Wire'),('4Wire','4Wire')], initial='2Wire')
+        self.settings.New('Measure_Delay', dtype=float, unit='s',si = True)
         self.settings.New('ILimit', dtype=float, unit='A',si = True, initial= 1)
         self.settings.New('VLimit', dtype= float, unit = 'V', si = True, initial = 20)
         self.settings.New('Autorange', dtype='str', choices = [('On','On'),('Off','Off')], initial = 'On')
+        self.settings.New('AutoDelay', dtype=str, choices = [('On','On'),('Off','Off')])
         self.settings.New('NPLC', dtype = float, initial = 1, vmin=0.01, vmax = 10)
         self.add_operation('Reset', self.reset)
         self.add_operation('Beep', self.beep)
@@ -65,6 +67,12 @@ class Keithley2450HW(HardwareComponent):
 
         LQ["NPLC"].hardware_set_func    = self.set_NPLC
         LQ["NPLC"].hardware_read_func    = self.read_NPLC
+
+        LQ['Measure_Delay'].hardware_set_func = self.set_delay
+        LQ['Measure_Delay'].hardware_read_func = self.read_delay
+
+        LQ['AutoDelay'].hardware_set_func = self.set_autodelay
+        LQ['AutoDelay'].hardware_read_func = self.read_autodelay
 
         LQ["ILimit"].hardware_set_func    = self.set_ilimit
         LQ["ILimit"].hardware_read_func    = self.read_ilimit
@@ -211,6 +219,39 @@ class Keithley2450HW(HardwareComponent):
             return 'On'
         else:
             return 'Off'
+
+    def set_delay(self,delay):
+        self.keithley.write("smu.source.delay = {:f}".format(delay))
+
+    def read_delay(self):
+        self.keithley.write("delay1 = smu.source.delay")
+        return float(keithley.query("print(delay1)"))
+
+    def read_autodelay(self):
+        self.keithley.write("state = smu.source.autodelay")
+        state = str(keithley.query("print(state)"))
+
+        if state == 'smu.ON':
+            return 'On'
+        else:
+            return 'Off'
+
+    def set_autodelay(self,state):
+        if state =='On':
+            self.keithley.write('smu.source.autodelay = smu.ON')
+        else:
+            self.keithley.write('smu.source.autodelay = smu.OFF')
+
+    def read_measurement(self):
+        keithley.write("current = smu.measure.read()")
+        return float(keithley.query("print(current)"))
+
+    def read_measurement_withTime(self):
+        keithley.write("amp, sec, fracSec = smu.measure.readwithtime()")
+        amp = keithley.query("print(amp)")
+        sec = keithley.query("print(sec)")
+        fracSec = keithley.query("print(fracSec)")
+        return float(amp), float(sec)+float(fracSec)
 
     def clear_buffer(self):
         self.keithley.write("defbuffer1.clear()")
