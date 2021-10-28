@@ -30,14 +30,9 @@ class KeithleyJVApp(BaseMicroscopeApp):
         print("Create Measurement objects")
 
         # Connect to custom gui
-        from HW_picoharpmaster.picoharp_hist_measure import PicoHarpHistogramMeasure
-        from Diffusion_Measure import Diffusion_Measure
-        from MultiHarpHW.multiharp_hist_measure import MultiHarpHistogramMeasure
-        from Diffusion_Measure_MultiHarp import Diffusion_Measure_MultiHarp
-        self.add_measurement(PicoHarpHistogramMeasure(self))
-        self.add_measurement(Diffusion_Measure(self))
-        self.add_measurement(MultiHarpHistogramMeasure(self))
-        self.add_measurement(Diffusion_Measure_MultiHarp(self))
+        from JVMeasure import JVMeasure
+        self.add_measurement(JVMeasure(self))
+
         
         # load side panel UI
         
@@ -49,7 +44,7 @@ class KeithleyJVApp(BaseMicroscopeApp):
 if __name__ == '__main__':
     import sys
     
-    app = DiffusionApp(sys.argv)
+    app = KeithleyJVApp(sys.argv)
     #Uncomment line below for dark mode
     # app.qtapp.setStyleSheet(qdarkstyle.load_stylesheet())
     sys.exit(app.exec_())

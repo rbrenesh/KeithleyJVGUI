@@ -22,15 +22,15 @@ class Keithley2450HW(HardwareComponent):
     def setup(self):
         
         self.settings.New('Source', dtype=str, choices=[("Voltage","Voltage"),("Current","Current")], initial='Voltage')
-        self.settings.New('Measurement', dtype=str, choices=[("Voltage","Voltage"),("Current","Current")], initial='Voltage')
+        self.settings.New('Measurement', dtype=str, choices=[("Voltage","Voltage"),("Current","Current")], initial='Current')
         self.settings.New('Level', dtype = float, initial = 0, vmin=-50, vmax=50)
-        self.settings.New('Output',dtype='str', choices = [('On','On'),('Off','Off')], initial = 'Off')
+        self.settings.New('Output',dtype=str, choices = [('On','On'),('Off','Off')], initial = 'Off')
         self.settings.New('Terminals', dtype =str, choices=[('Front','Front'),('Rear','Rear')], initial='Rear')
         self.settings.New('Sense', dtype =str, choices=[('2Wire','2Wire'),('4Wire','4Wire')], initial='2Wire')
         self.settings.New('Measure_Delay', dtype=float, unit='s',si = True)
         self.settings.New('ILimit', dtype=float, unit='A',si = True, initial= 1)
         self.settings.New('VLimit', dtype= float, unit = 'V', si = True, initial = 20)
-        self.settings.New('Autorange', dtype='str', choices = [('On','On'),('Off','Off')], initial = 'On')
+        self.settings.New('Autorange', dtype=str, choices = [('On','On'),('Off','Off')], initial = 'On')
         self.settings.New('AutoDelay', dtype=str, choices = [('On','On'),('Off','Off')])
         self.settings.New('NPLC', dtype = float, initial = 1, vmin=0.01, vmax = 10)
         self.add_operation('Reset', self.reset)
@@ -47,7 +47,7 @@ class Keithley2450HW(HardwareComponent):
         LQ["Source"].hardware_set_func    = self.set_source
         LQ["Source"].hardware_read_func = self.read_sourceFunc
 
-        LQ["Measurement"].hardware_set_func    = self.set_measurement
+        LQ["Measurement"].hardware_set_func    = self.set_measureFunc
         LQ["Measurement"].hardware_read_func = self.read_measureFunc
 
         LQ["Level"].hardware_set_func    = self.set_level
@@ -77,21 +77,21 @@ class Keithley2450HW(HardwareComponent):
         LQ["ILimit"].hardware_set_func    = self.set_ilimit
         LQ["ILimit"].hardware_read_func    = self.read_ilimit
 
-        LQ['Vlimit'].hardware_set_func = self.set_vlimit
+        LQ['VLimit'].hardware_set_func = self.set_vlimit
         LQ["VLimit"].hardware_read_func    = self.read_vlimit
 
         #Reset the Keithley, which also reads all the default values from hardware
         self.reset()
 
     def set_source(self,func='Voltage'):
-        if func = 'Voltage':
+        if func == 'Voltage':
             self.keithley.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
 
             #Maximum and minimum levels from Keithley 2450 manual
             self.settings.Level.vmin = -210
             self.settings.Level.vmax = 210
             self.settings.Level.unit = 'V'
-        elif func = 'Current':
+        elif func == 'Current':
             self.keithley.write("smu.source.func = smu.FUNC_DC_CURRENT")
 
             #Maximum and minimum levels from Keithley 2450 manual
@@ -111,9 +111,9 @@ class Keithley2450HW(HardwareComponent):
 
     def set_measureFunc(self,func='Current'):
 
-        if func = 'Voltage':
+        if func == 'Voltage':
             self.keithley.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        elif func = 'Current':
+        elif func == 'Current':
             self.keithley.write("smu.measure.func = smu.FUNC_DC_CURRENT")
         else:
             raise InvalidMeasurementError('Invalid measurement function')
@@ -151,12 +151,16 @@ class Keithley2450HW(HardwareComponent):
 
     def read_vlimit(self):
         self.keithley.write("vlimit = smu.source.vlimit.level")
-        return float(self.keithley.query("print(vlimit)"))
+        vlim = self.keithley.query("print(vlimit)")
+        if vlim == 'nil\n':
+            return 210
+        else:
+            return float(vlim)
 
     def set_sense(self,m_type):
-        if m_type = '2Wire':
+        if m_type == '2Wire':
             self.keithley.write("smu.measure.sense=smu.SENSE_2WIRE")
-        elif m_type = '4Wire':
+        elif m_type == '4Wire':
             self.keithley.write("smu.measure.sense=smu.SENSE_4WIRE")
         else:
             raise InvalidSenseError('Invalid sense type')
@@ -170,9 +174,9 @@ class Keithley2450HW(HardwareComponent):
             return '4Wire'
 
     def set_terminals(self,terminal):
-        if terminal = 'Front':
+        if terminal == 'Front':
             self.keithley.write("smu.measure.terminals = smu.TERMINALS_FRONT")
-        elif terminal = 'Rear':
+        elif terminal == 'Rear':
             self.keithley.write("smu.measure.terminals = smu.TERMINALS_REAR")
         else:
             raise InvalidTerminalError('Invalid terminal')
@@ -186,7 +190,7 @@ class Keithley2450HW(HardwareComponent):
             return 'Rear'
 
     def set_autorange(self,autorange='On'):
-        if autorange = 'On':
+        if autorange == 'On':
             self.keithley.write("smu.measure.autorange = smu.ON")
         else:
             self.keithley.write("smu.measure.autorange = smu.OFF")
@@ -204,10 +208,14 @@ class Keithley2450HW(HardwareComponent):
 
     def read_NPLC(self):
         self.keithley.write("nplc = smu.source.nplc")
-        return float(self.keithley.query("print(nplc)"))
+        nplc = self.keithley.query("print(nplc)")
+        if nplc == 'nil\n':
+            return float(1)
+        else:
+            return float(nplc)
 
     def set_output(self,output):
-        if output = 'On':
+        if output == 'On':
             self.keithley.write("smu.source.output=smu.ON")
         else:
             self.keithley.write("smu.source.output=smu.OFF")
@@ -225,11 +233,11 @@ class Keithley2450HW(HardwareComponent):
 
     def read_delay(self):
         self.keithley.write("delay1 = smu.source.delay")
-        return float(keithley.query("print(delay1)"))
+        return float(self.keithley.query("print(delay1)"))
 
     def read_autodelay(self):
         self.keithley.write("state = smu.source.autodelay")
-        state = str(keithley.query("print(state)"))
+        state = str(self.keithley.query("print(state)"))
 
         if state == 'smu.ON':
             return 'On'
@@ -243,14 +251,15 @@ class Keithley2450HW(HardwareComponent):
             self.keithley.write('smu.source.autodelay = smu.OFF')
 
     def read_measurement(self):
-        keithley.write("current = smu.measure.read()")
-        return float(keithley.query("print(current)"))
+        self.keithley.write("current = smu.measure.read()")
+        return float(self.keithley.query("print(current)"))
 
     def read_measurement_withTime(self):
-        keithley.write("amp, sec, fracSec = smu.measure.readwithtime()")
-        amp = keithley.query("print(amp)")
-        sec = keithley.query("print(sec)")
-        fracSec = keithley.query("print(fracSec)")
+        self.keithley.write("amp, sec, fracSec = smu.measure.readwithtime()")
+        amp = self.keithley.query("print(amp)")
+        sec = self.keithley.query("print(sec)")
+        fracSec = self.keithley.query("print(fracSec)")
+        print(float(sec)+float(fracSec))
         return float(amp), float(sec)+float(fracSec)
 
     def clear_buffer(self):
@@ -264,6 +273,9 @@ class Keithley2450HW(HardwareComponent):
         self.keithley.write('beeper.beep({0:f}, {1:f})'.format(duration,freq))
 
     def disconnect(self):
-        self.rm.close()
-        del self.rm
-        del self.keithley
+        try:
+            self.rm.close()
+            del self.rm
+            del self.keithley
+        except AttributeError as e:
+            pass
