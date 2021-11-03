@@ -48,6 +48,7 @@ class JVMeasure(Measurement):
 
         #connect settings to buttons
         self.settings.Measurement.connect_to_widget(self.ui.measurement_comboBox)
+        self.ui.measurement_comboBox.currentIndexChanged.connect(self.measurement_change)
         self.settings.start_voltage.connect_to_widget(self.ui.startV_doubleSpinBox)
         self.settings.end_voltage.connect_to_widget(self.ui.endV_doubleSpinBox)
         self.settings.npoints.connect_to_widget(self.ui.npoints_spinBox)
@@ -55,6 +56,9 @@ class JVMeasure(Measurement):
         self.settings.itrack_delay.connect_to_widget(self.ui.delay_itrack_doubleSpinBox)
         self.settings.vtrack_delay.connect_to_widget(self.ui.delay_vtrack_doubleSpinBox)
         self.set_progress(0)
+
+    def measurement_change(self):
+        pass
 
     def lock_start_button(self):
         self.op_buttons['start'].setEnabled(False)
