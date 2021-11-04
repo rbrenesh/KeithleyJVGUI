@@ -38,7 +38,10 @@ class JVMeasure(Measurement):
         self.app.settings.save_dir.default_dir = initial_save_dir
         self.app.settings.save_dir.update_value(new_val=initial_save_dir)
 
-        self.keithley  = self.app.hardware['Keithley 2450']
+        try:
+            self.keithley  = self.app.hardware['Keithley 2450']
+        except Exception as e:
+            raise e
 
         # self.threadpool = QtCore.QThreadPool()
 
@@ -106,13 +109,13 @@ class JVMeasure(Measurement):
 
         # save data depending on the type of measurement
         if self.settings['Measurement'] == 'JV Measurement':
-            np.savetxt(data_filename+'.txt',np.vstack((self.vlist,np.array(self.data))).T)
+            np.savetxt(data_filename+'.csv',np.vstack((self.vlist,np.array(self.data))).T, delimiter = ',')
 
         elif self.settings['Measurement'] == 'Current Tracking':
-            np.savetxt(data_filename+'.txt',np.vstack((np.array(self.tlist)-self.tlist[0],np.array(self.data))).T)
+            np.savetxt(data_filename+'.csv',np.vstack((np.array(self.tlist)-self.tlist[0],np.array(self.data))).T,delimiter = ',')
 
         else:
-            np.savetxt(data_filename+'.txt',np.vstack((np.array(self.tlist)-self.tlist[0],np.array(self.data))).T)
+            np.savetxt(data_filename+'.csv',np.vstack((np.array(self.tlist)-self.tlist[0],np.array(self.data))).T,delimiter = ',')
 
     def pre_run(self):
         self.lock_start_button()

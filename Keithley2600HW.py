@@ -38,7 +38,7 @@ class Keithley2600HW(HardwareComponent):
 
     def connect(self):
         self.rm = pyvisa.ResourceManager()
-        self.keithley = self.rm.open_resource('GPIB0::18::INSTR')
+        self.keithley = self.rm.open_resource('GPIB0::26::INSTR')
 
         LQ = self.settings.as_dict()
 
