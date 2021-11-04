@@ -1,12 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+sys.setrecursionlimit(5000)
 
 block_cipher = None
 
+added_files = [
+         ( 'C:\\ProgramData\\Anaconda3\\envs\\scopefoundry\\Lib\\site-packages\\ScopeFoundry\\base_microscope_app_mdi.ui', 'ScopeFoundry' ),
+         ( 'C:\\ProgramData\\Anaconda3\\envs\\scopefoundry\\Lib\\site-packages\\ScopeFoundry\\base_microscope_app.ui', 'ScopeFoundry' ),
+         ( 'JVMeasurement_ui.ui','.'),
+         ]
 
 a = Analysis(['main_app.py'],
              pathex=['C:\\Users\\solaradmin\\Documents\\GitHub\\KeithleyJVGUI'],
              binaries=[],
-             datas=[],
+             datas=[added_files],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -25,6 +32,7 @@ exe = EXE(pyz,
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
+          uac_admin = True,
           upx=True,
           console=True )
 coll = COLLECT(exe,
