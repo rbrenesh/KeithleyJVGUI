@@ -16,10 +16,9 @@ class JVMeasure(Measurement):
 
     name = "JV Measurement"
 
-    hardware_requirements = ['Keithley 2450']
+    hardware_requirements = ['Keithley 2600']
 
-    measurement_sucessfully_completed = QtCore.Signal(())
-    
+    measurement_sucessfully_completed = QtCore.Signal(())    
 
     def setup(self):
         self.ui = load_qt_ui_file(sibling_path(__file__, 'JVMeasurement_ui.ui'))
@@ -54,6 +53,8 @@ class JVMeasure(Measurement):
         self.settings.end_voltage.connect_to_widget(self.ui.endV_doubleSpinBox)
         self.settings.npoints.connect_to_widget(self.ui.npoints_spinBox)
         self.keithley.settings.Measure_Delay.connect_to_widget(self.ui.JVdelaytime_doubleSpinBox)
+        self.settings.constant_v.connect_to_widget(self.ui.voltage_doubleSpinBox)
+        self.settings.constant_i.connect_to_widget(self.ui.current_doubleSpinBox)
         self.settings.itrack_delay.connect_to_widget(self.ui.delay_itrack_doubleSpinBox)
         self.settings.vtrack_delay.connect_to_widget(self.ui.delay_vtrack_doubleSpinBox)
         self.set_progress(0)
@@ -125,11 +126,6 @@ class JVMeasure(Measurement):
             np.savetxt(data_filename+'.csv',np.vstack((np.array(self.tlist)-self.tlist[0],np.array(self.data))).T,delimiter = ',')
 
     def pre_run(self):
-        if self.app.hardware['Keithley 2450'].settings['connected']:
-            self.keithley = self.app.hardware['Keithley 2450']
-
-        else:
-            self.keithley = self.app.hardware['Keithley 2600']
         self.lock_start_button()
         S = self.settings 
         self.vlist = np.linspace(S['start_voltage'],S['end_voltage'],S['npoints'])
