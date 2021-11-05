@@ -166,7 +166,7 @@ class JVMeasure(Measurement):
                     self.data.append(self.keithley.read_measurement())
                     self.set_progress(i/S['npoints']*100)
 
-                    if not self.interrupt_measurement_called:
+                    if self.interrupt_measurement_called:
                         break
 
                 self.keithley.set_output('Off')
