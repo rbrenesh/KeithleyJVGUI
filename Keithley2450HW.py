@@ -221,8 +221,7 @@ class Keithley2450HW(HardwareComponent):
             self.keithley.write("smu.source.output=smu.OFF")
 
     def read_output(self):
-        self.keithley.write("output = smu.source.output")
-        output = str(self.keithley.query("print(output)"))
+        output = str(self.keithley.query("print(smu.source.output)"))
         if output == 'smu.ON':
             return 'On'
         else:
@@ -232,8 +231,7 @@ class Keithley2450HW(HardwareComponent):
         self.keithley.write("smu.source.delay = {:f}".format(delay))
 
     def read_delay(self):
-        self.keithley.write("delay1 = smu.source.delay")
-        return float(self.keithley.query("print(delay1)"))
+        return float(self.keithley.query("print(smu.source.delay)"))
 
     def read_autodelay(self):
         self.keithley.write("state = smu.source.autodelay")
@@ -251,8 +249,7 @@ class Keithley2450HW(HardwareComponent):
             self.keithley.write('smu.source.autodelay = smu.OFF')
 
     def read_measurement(self):
-        self.keithley.write("current = smu.measure.read()")
-        return float(self.keithley.query("print(current)"))
+        return float(self.keithley.query("print(smu.measure.read())"))
 
     def read_measurement_withTime(self):
         self.keithley.write("amp, sec, fracSec = smu.measure.readwithtime()")

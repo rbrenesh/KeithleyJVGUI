@@ -19,6 +19,7 @@ class JVMeasure(Measurement):
     hardware_requirements = ['Keithley 2450']
 
     measurement_sucessfully_completed = QtCore.Signal(())
+    
 
     def setup(self):
         self.ui = load_qt_ui_file(sibling_path(__file__, 'JVMeasurement_ui.ui'))
@@ -38,12 +39,9 @@ class JVMeasure(Measurement):
         self.app.settings.save_dir.default_dir = initial_save_dir
         self.app.settings.save_dir.update_value(new_val=initial_save_dir)
 
-        try:
-            self.keithley  = self.app.hardware['Keithley 2450']
-        except Exception as e:
-            raise e
-
         # self.threadpool = QtCore.QThreadPool()
+
+        self.keithley = self.app.hardware['Keithley 2450']
 
         self.ui.start_pushButton.clicked.connect(self.start)
         self.ui.interrupt_pushButton.clicked.connect(self.interrupt)
@@ -61,7 +59,16 @@ class JVMeasure(Measurement):
         self.set_progress(0)
 
     def measurement_change(self):
-        pass
+        if self.settings['Measurement'] == 'JV Measurement':
+            self.jv_plot.setLabel('left', 'Current', units = 'A')
+            self.jv_plot.setLabel('bottom', 'Voltage', units = 'V')
+        elif self.settings['Measurement'] == 'Current Tracking':
+            self.jv_plot.setLabel('left', 'Current', units = 'A')
+            self.jv_plot.setLabel('bottom', 'Seconds', units = 's')
+        else:
+            self.jv_plot.setLabel('left', 'Voltage', units = 'V')
+            self.jv_plot.setLabel('bottom', 'Seconds', units = 's')
+        
 
     def lock_start_button(self):
         self.op_buttons['start'].setEnabled(False)
@@ -118,6 +125,11 @@ class JVMeasure(Measurement):
             np.savetxt(data_filename+'.csv',np.vstack((np.array(self.tlist)-self.tlist[0],np.array(self.data))).T,delimiter = ',')
 
     def pre_run(self):
+        if self.app.hardware['Keithley 2450'].settings['connected']:
+            self.keithley = self.app.hardware['Keithley 2450']
+
+        else:
+            self.keithley = self.app.hardware['Keithley 2600']
         self.lock_start_button()
         S = self.settings 
         self.vlist = np.linspace(S['start_voltage'],S['end_voltage'],S['npoints'])
@@ -196,11 +208,13 @@ class JVMeasure(Measurement):
         
         self.jv_plot = self.graph_layout.addPlot()
         self.jv_plot.getViewBox().setMouseMode(pg.ViewBox.RectMode)
+        self.jv_plot.setLabel('left', 'Current', units = 'A')
+        self.jv_plot.setLabel('bottom', 'Voltage', units = 'V')
 
         #Add infinite vertical and horizontal lines to plot (for easy JV curve viewing)
         self.jv_plot.addItem(self.vline)
         self.jv_plot.addItem(self.hline)
-        self.jv_plot_line = self.jv_plot.plot()
+        self.jv_plot_line = self.jv_plot.plot(pen=pg.mkPen('b', width=5))
         self.jv_plot.enableAutoRange()
 
     def update_display(self):

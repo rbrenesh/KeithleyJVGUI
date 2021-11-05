@@ -7,13 +7,16 @@ block_cipher = None
 added_files = [
          ( 'C:\\ProgramData\\Anaconda3\\envs\\scopefoundry\\Lib\\site-packages\\ScopeFoundry\\base_microscope_app_mdi.ui', 'ScopeFoundry' ),
          ( 'C:\\ProgramData\\Anaconda3\\envs\\scopefoundry\\Lib\\site-packages\\ScopeFoundry\\base_microscope_app.ui', 'ScopeFoundry' ),
-         ( 'JVMeasurement_ui.ui','.'),
+         ( 'JVMeasurement_ui.ui','.')
          ]
+
+
+
 
 a = Analysis(['main_app.py'],
              pathex=['C:\\Users\\solaradmin\\Documents\\GitHub\\KeithleyJVGUI'],
              binaries=[],
-             datas=[added_files],
+             datas=added_files,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -22,8 +25,28 @@ a = Analysis(['main_app.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+
+Key = ['mkl','libopenblas']
+
+def remove_from_list(input, keys):
+    outlist = []
+    for item in input:
+        name, _, _ = item
+        flag = 0
+        for key_word in keys:
+            if name.find(key_word) > -1:
+                flag = 1
+        if flag != 1:
+            outlist.append(item)
+    return outlist
+
+a.binaries = remove_from_list(a.binaries, Key)
+
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
+
+
+
 exe = EXE(pyz,
           a.scripts,
           [],

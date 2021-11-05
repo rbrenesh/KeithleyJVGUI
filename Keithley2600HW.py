@@ -174,7 +174,7 @@ class Keithley2600HW(HardwareComponent):
             if autorange == 'On':
                 self.keithley.write("smua.measure.autorangev = smua.AUTORANGE_ON")
             else:
-                self.keithley.write("smu.measure.autorangev = smua.AUTORANGE_OFF")
+                self.keithley.write("smua.measure.autorangev = smua.AUTORANGE_OFF")
 
     def read_autorange(self):
 
@@ -195,7 +195,7 @@ class Keithley2600HW(HardwareComponent):
         self.keithley.write("smua.measure.nplc = {:f}".format(NPLC))
 
     def read_NPLC(self):
-        nplc = self.keithley.query("print(smu.source.nplc)")
+        nplc = self.keithley.query("print(smua.source.nplc)")
         if nplc == 'nil\n':
             return float(1)
         else:
