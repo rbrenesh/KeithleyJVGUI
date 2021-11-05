@@ -83,6 +83,9 @@ class Keithley2450HW(HardwareComponent):
         #Reset the Keithley, which also reads all the default values from hardware
         self.reset()
 
+        self.settings['ILimit'] = 1
+        self.settings['Sense'] = '2Wire'
+
     def set_source(self,func='Voltage'):
         if func == 'Voltage':
             self.keithley.write("smu.source.func = smu.FUNC_DC_VOLTAGE")

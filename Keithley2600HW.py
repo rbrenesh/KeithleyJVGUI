@@ -36,6 +36,7 @@ class Keithley2600HW(HardwareComponent):
         self.add_operation('Reset', self.reset)
         self.add_operation('Beep', self.beep)
 
+
     def connect(self):
         self.rm = pyvisa.ResourceManager()
         self.keithley = self.rm.open_resource('GPIB0::26::INSTR')
@@ -76,6 +77,9 @@ class Keithley2600HW(HardwareComponent):
 
         #Reset the Keithley, which also reads all the default values from hardware
         self.reset()
+
+        self.settings['ILimit'] = 1
+        self.settings['Sense'] = '2Wire'
 
     def set_source(self,func='Voltage'):
         if func == 'Voltage':

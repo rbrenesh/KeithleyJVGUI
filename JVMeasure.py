@@ -16,7 +16,7 @@ class JVMeasure(Measurement):
 
     name = "JV Measurement"
 
-    hardware_requirements = ['Keithley 2600']
+    hardware_requirements = ['Keithley 2450']
 
     measurement_sucessfully_completed = QtCore.Signal(())    
 
@@ -126,6 +126,16 @@ class JVMeasure(Measurement):
             np.savetxt(data_filename+'.csv',np.vstack((np.array(self.tlist)-self.tlist[0],np.array(self.data))).T,delimiter = ',')
 
     def pre_run(self):
+
+        if self.settings['Measurement'] == 'JV Measurement' and self.vline.isVisible()==False:
+            self.vline.show()
+            self.hline.show()
+
+        else:
+            self.vline.hide()
+            self.hline.hide()
+
+
         self.lock_start_button()
         S = self.settings 
         self.vlist = np.linspace(S['start_voltage'],S['end_voltage'],S['npoints'])
@@ -156,6 +166,9 @@ class JVMeasure(Measurement):
                     self.data.append(self.keithley.read_measurement())
                     self.set_progress(i/S['npoints']*100)
 
+                    if not self.interrupt_measurement_called:
+                        break
+
                 self.keithley.set_output('Off')
                 self.keithley.clear_buffer()
 
@@ -164,6 +177,10 @@ class JVMeasure(Measurement):
 
             elif self.settings['Measurement'] == 'Current Tracking':
                 self.set_progress(50)
+                self.keithley.set_source('Voltage')
+                self.keithley.set_measureFunc('Current')
+                self.keithley.clear_buffer()
+                self.keithley.set_output('On')
                 self.keithley.set_level(S['constant_v'])
                 temp_dat, t = self.keithley.read_measurement_withTime()
 
@@ -174,6 +191,10 @@ class JVMeasure(Measurement):
 
             else:
                 self.set_progress(50)
+                self.keithley.set_source('Current')
+                self.keithley.set_measureFunc('Voltage')
+                self.keithley.clear_buffer()
+                self.keithley.set_output('On')
                 self.keithley.set_level(S['constant_i'])
 
                 temp_dat, t = self.keithley.read_measurement_withTime()
@@ -183,6 +204,7 @@ class JVMeasure(Measurement):
 
                 time.sleep(S['vtrack_delay'])
 
+        self.keithley.set_output('Off')
         self.save_file()
 
 
@@ -210,6 +232,9 @@ class JVMeasure(Measurement):
         #Add infinite vertical and horizontal lines to plot (for easy JV curve viewing)
         self.jv_plot.addItem(self.vline)
         self.jv_plot.addItem(self.hline)
+
+        # self.vline.hide()
+        # self.hline.hide()
         self.jv_plot_line = self.jv_plot.plot(pen=pg.mkPen('b', width=5))
         self.jv_plot.enableAutoRange()
 
