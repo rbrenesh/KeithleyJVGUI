@@ -127,7 +127,7 @@ class JVMeasure(Measurement):
 
     def pre_run(self):
 
-        if self.settings['Measurement'] == 'JV Measurement' and self.vline.isVisible()==False:
+        if self.settings['Measurement'] == 'JV Measurement':
             self.vline.show()
             self.hline.show()
 

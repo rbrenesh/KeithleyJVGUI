@@ -24,9 +24,9 @@ class KeithleyJVApp(BaseMicroscopeApp):
         #Add hardware components
         print("Adding Hardware Components")
         from Keithley2450HW import Keithley2450HW
-        from Keithley2600HW import Keithley2600HW
+        # from Keithley2600HW import Keithley2600HW
         self.add_hardware(Keithley2450HW(self))
-        self.add_hardware(Keithley2600HW(self))
+        # self.add_hardware(Keithley2600HW(self))
 
         #Add measurement components
         print("Create Measurement objects")
